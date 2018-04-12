@@ -26,6 +26,10 @@ var _discoverReducer = require('./discoverReducer');
 
 var _discoverReducer2 = _interopRequireDefault(_discoverReducer);
 
+var _profileReducer = require('./profileReducer');
+
+var _profileReducer2 = _interopRequireDefault(_profileReducer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // TODO: determine appropriate imports
@@ -47,7 +51,8 @@ var tweetApp = (0, _redux.combineReducers)({
   messageReducer: _messageReducer2.default,
   tweetList: _tweetListReducer2.default,
   tweet: _tweetReducer2.default,
-  discoverReducer: _discoverReducer2.default
+  discoverReducer: _discoverReducer2.default,
+  profileReducer: _profileReducer2.default
 });
 
 exports.default = tweetApp;

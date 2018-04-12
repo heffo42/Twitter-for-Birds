@@ -44,6 +44,7 @@ var EditProfile = function (_Component) {
         photo: this.refs.photo.value
       };
       // TODO: make a call to update the profile
+      this.props.update(data);
     }
   }, {
     key: 'render',
@@ -118,7 +119,13 @@ var EditProfile = function (_Component) {
   return EditProfile;
 }(_react.Component);
 
-var mapDispatchToProps = function mapDispatchToProps(dispatch) {};
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    update: function update(data) {
+      return dispatch((0, _profileActions.updateProfile)(data));
+    }
+  };
+};
 
 // set up a call to the updateProfile async action creator
 // ie just do the regular mapDispatchToProps type of

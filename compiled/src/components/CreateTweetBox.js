@@ -39,6 +39,7 @@ var CreateTweetBox = function (_Component) {
     value: function submitTweet(e) {
       e.preventDefault();
       var tweetContent = this.refs.newTweet.value;
+      this.props.createNewTweet(tweetContent);
       // TODO: include a call to create a new tweet
     }
   }, {
@@ -77,7 +78,11 @@ var CreateTweetBox = function (_Component) {
   return CreateTweetBox;
 }(_react.Component);
 
-var mapDispatchToProps = function mapDispatchToProps(dispatch) {};
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return { createNewTweet: function createNewTweet(id) {
+      return dispatch((0, _tweetActions.createNewTweet)(id));
+    } };
+};
 // supply the component with a property 'createNewTweet' that will dispatch
 // the createNewTweet action  with the new tweet's content
 

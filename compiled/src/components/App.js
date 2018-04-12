@@ -36,6 +36,14 @@ var _NewsFeed = require('./NewsFeed');
 
 var _NewsFeed2 = _interopRequireDefault(_NewsFeed);
 
+var _Profile = require('./Profile');
+
+var _Profile2 = _interopRequireDefault(_Profile);
+
+var _EditProfile = require('./EditProfile');
+
+var _EditProfile2 = _interopRequireDefault(_EditProfile);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -79,18 +87,17 @@ var App = function (_Component) {
         _react2.default.createElement(_Navbar2.default, null),
         _react2.default.createElement(_Flashes2.default, null),
         _react2.default.createElement(
-          _reactRouterDom.BrowserRouter,
+          'div',
           null,
           _react2.default.createElement(
-            'div',
+            _reactRouterDom.Switch,
             null,
-            _react2.default.createElement(
-              _reactRouterDom.Switch,
-              null,
-              _react2.default.createElement(_reactRouterDom.Route, { path: '/signx', component: _SignX2.default }),
-              _react2.default.createElement(_reactRouterDom.Route, { path: '/logout', component: (0, _AuthHOC2.default)(_Logout2.default) }),
-              _react2.default.createElement(_reactRouterDom.Route, { path: '/feed', component: (0, _AuthHOC2.default)(_NewsFeed2.default) })
-            )
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/signx', component: _SignX2.default }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/logout', component: (0, _AuthHOC2.default)(_Logout2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/feed', component: (0, _AuthHOC2.default)(_NewsFeed2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/profile/:id?', component: (0, _AuthHOC2.default)(_Profile2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/edit-profile', component: (0, _AuthHOC2.default)(_EditProfile2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { component: _SignX2.default })
           )
         )
       );

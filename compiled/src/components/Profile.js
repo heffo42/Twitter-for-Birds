@@ -48,9 +48,12 @@ var Profile = function (_Component) {
   _createClass(Profile, [{
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       // TODO: the component should have  a ProfileBox  and TweetList component, if
       // an id is specified in the url (you can check this by looking at
       // this.props.match.params.id then render out a CreateTweetBox else dont
+
       // the ProfileBox should have the props `id` corresponding  to this.props.match.params.id
       // `user` corresponding to a  function that will dispatch the getUser async function with
       // appropriate arguments
@@ -74,13 +77,66 @@ var Profile = function (_Component) {
       //  </div>
       // </div>
 
+
+      var tweetbox;
+      if (!this.props.match.params.id) {
+        tweetbox = _react2.default.createElement(_CreateTweetBox2.default, null);
+      }
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'container' },
+        _react2.default.createElement(
+          'h2',
+          null,
+          'Profile'
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'row' },
+          _react2.default.createElement(
+            'div',
+            { className: 'col-md-4' },
+            _react2.default.createElement(_ProfileBox2.default, { id: this.props.match.params.id,
+              user: function user() {
+                return _this2.props.user(_this2.props.match.params.id);
+              },
+              favUnfav: function favUnfav() {
+                return _this2.props.favUnfav(_this2.props.match.params.id);
+              } })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'col-md-8' },
+            tweetbox,
+            _react2.default.createElement(_TweetList2.default, { loadTweets: function loadTweets() {
+                return _this2.props.loadTweetsFor(_this2.props.match.params.id);
+              } })
+          )
+        )
+      );
     }
   }]);
 
   return Profile;
 }(_react.Component);
+/*
+const mapDispatchToProps = dispatch =>
+return {}*/
 
-var mapDispatchToProps = function mapDispatchToProps(dispatch) {};
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    loadTweetsFor: function loadTweetsFor(userId) {
+      return dispatch((0, _tweetActions.loadTweetsForProfile)(userId));
+    },
+    user: function user(id) {
+      return dispatch((0, _profileActions.getUser)(id));
+    },
+    favUnfav: function favUnfav(id) {
+      return dispatch((0, _profileActions.favUnfav)(id));
+    }
+  };
+};
 // optionally use this to handle assigning dispatch actions to props
 
 

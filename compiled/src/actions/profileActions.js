@@ -4,6 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.FAVUNFAV_REJ = exports.FAVUNFAV_FUL = exports.GETPROFILE_REJ = exports.GETPROFILE_FUL = exports.UPDATEPROFILE_REJ = exports.UPDATEPROFILE_FUL = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 exports.updateProfile = updateProfile;
 exports.getUser = getUser;
 exports.favUnfav = favUnfav;
@@ -36,9 +39,29 @@ function updateProfile(data) {
   // properties name, species, and image
   // If the request fails/errors, send an action of type UPDATEPROFILE_REJ and
   // add an additional property `error` containing the error itself
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('POST', '/api/profile/edit', data).then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      var data = resp.data;
+      console.log('profile actions');
+      console.log(resp);
+      dispatch({
+        type: UPDATEPROFILE_FUL,
+        message: 'You have updated your profile and can now check it',
+        profile: data
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: UPDATEPROFILE_REJ,
+        error: error
+      });
+    });
+  };
 }
 
 function getUser(id) {
+  console.log('profile action: getting user');
   // TODO: async action creator again
   // make an authenticated request to the route  that allows us to get profile
   // information. (you can ref your express files for this to see what type  of
@@ -49,6 +72,26 @@ function getUser(id) {
   // method for what is returned)
   // if there's  an error, dispatch a GETPROFILE_REJ action with an addition property `error`
   // equal to the error
+  var route = '/api/profile/info';
+  if (id) {
+    route = '/api/profile/' + id + '/info';
+  }
+
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('GET', route).then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      dispatch({
+        type: GETPROFILE_FUL,
+        profile: resp.data
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: GETPROFILE_REJ,
+        error: error
+      });
+    });
+  };
 }
 
 function favUnfav(id) {
@@ -60,4 +103,30 @@ function favUnfav(id) {
   // else if there is an  error
   // dispatch an action FAVUNFAV_REJ  with an error equal  to the error of the
   // request
+  console.log('id is: ');
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('POST', '/api/profile/' + id + '/follow').then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      var statement = 'fill';
+      console.log(resp);
+      console.log(String(resp.data.isFollowing) + " with a type of: " + _typeof(String(resp.data.isFollowing)));
+      if (String(resp.data.isFollowing) === 'true') {
+        console.log('why can does this not happen');
+        statement = 'You are now following this person';
+      } else {
+        statement = 'You are now unfollowing this person';
+      }
+      dispatch({
+        type: FAVUNFAV_FUL,
+        profile: resp.data,
+        message: statement
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: FAVUNFAV_REJ,
+        error: error
+      });
+    });
+  };
 }

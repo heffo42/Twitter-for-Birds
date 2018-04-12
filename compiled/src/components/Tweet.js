@@ -112,9 +112,9 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch)
 // TODO: set up a prop `favoriteTweet` dispatchings the favoriteTweet acition with the id
 // of the tweet (as an argument to this function
 {
-  favoriteTweet: (function (id) {
-    return dispatch((0, _tweetActions.favoriteTweet)(id));
-  });
+  return { favoriteTweet: function favoriteTweet(id) {
+      return dispatch((0, _tweetActions.favoriteTweet)(id));
+    } };
 };
 
 var mapStateToProps = function mapStateToProps(state, ownProps) {

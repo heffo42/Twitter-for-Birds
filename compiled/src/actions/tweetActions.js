@@ -97,6 +97,23 @@ function createNewTweet(tweetContent) {
   // if the request is successful we send  a CREATETWEET_FUL action with message and some data
   // corresponding  to the new tweet (we get it from the response (determined by express))
   // if there is  an error, dispatch a CREATETWEET_REJ error
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('POST', '/api/tweet', { content: tweetContent }).then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      var data = resp.data;
+      dispatch({
+        type: CREATETWEET_FUL,
+        message: 'You have just made a new tweeeeeettttt',
+        data: data
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: CREATETWEET_REJ,
+        error: error
+      });
+    });
+  };
 }
 
 function getDiscoverBirds() {

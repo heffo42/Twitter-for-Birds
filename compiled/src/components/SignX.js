@@ -39,7 +39,7 @@ var SignX = function (_Component) {
       // TODO: if  the user is authenticated,
       // change the location to /feed
       // via this.props.history.push
-      if (this.props.authenticated) {
+      if (this.props.isAuthenticated) {
         this.props.history.push('/feed');
       } else {
         console.log('not auth on mount');
@@ -49,7 +49,7 @@ var SignX = function (_Component) {
     key: 'componentDidUpdate',
     value: function componentDidUpdate() {
       // TODO: do the same thing as in component did mount
-      if (this.props.authenticated) {
+      if (this.props.isAuthenticated) {
         this.props.history.push('/feed');
       }
     }
@@ -89,10 +89,18 @@ var SignX = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      console.log('sign rendering');
+
       var _props = this.props,
           isAuthenticated = _props.isAuthenticated,
           isFetching = _props.isFetching,
           messages = _props.messages;
+
+      if (this.props.isAuthenticated) {
+        this.props.history.push('/feed');
+      } else {
+        console.log('not auth on mount');
+      }
 
       return _react2.default.createElement(
         'div',
@@ -239,13 +247,22 @@ var SignX = function (_Component) {
 
   return SignX;
 }(_react.Component);
+/*
+const mapStateToProps = (state) => {
+  console.log('signx mapStateToProps called')
+  let { authReducer } = state;
+  return authReducer;
+}*/
 
 var mapStateToProps = function mapStateToProps(state) {
-  console.log('signx mapStateToProps called');
-  var authReducer = state.authReducer;
 
-  return authReducer;
+  return state.authReducer;
 };
+
+/*
+const mapStateToProps = state => ({
+  authReducer: state.authReducer,
+});*/
 
 /*
 function mapStateToProps(state) {
