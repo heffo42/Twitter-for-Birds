@@ -12,6 +12,9 @@ import Logout from './Logout'
 import Flashes from './Flashes'
 import AuthHOC from './AuthHOC';
 import NewsFeed from './NewsFeed';
+import Profile from './Profile'
+import EditProfile from './EditProfile'
+
 
 class App extends Component {
   constructor(props) {
@@ -39,15 +42,16 @@ class App extends Component {
      <div className="container-fluid">
           <NavBar/>
           <Flashes/>
-        <Router>
         <div>
           <Switch>
           <Route path="/signx" component={SignX}/>
           <Route path="/logout" component={AuthHOC(Logout)}/>
           <Route path="/feed" component={AuthHOC(NewsFeed)}/>
+          <Route path="/profile/:id?" component={AuthHOC(Profile)}/>
+          <Route path='/edit-profile' component={AuthHOC(EditProfile)}/>
+           <Route component={SignX}/>
           </Switch>
           </div>
-        </Router>
 
       </div>
     )

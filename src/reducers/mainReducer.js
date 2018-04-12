@@ -4,6 +4,7 @@ import messageReducer from './messageReducer'
 import tweetReducer from './tweetReducer'
 import tweetListReducer from './tweetListReducer'
 import discoverReducer from './discoverReducer'
+import profileReducer from './profileReducer'
 
 // TODO: determine appropriate imports
 
@@ -24,7 +25,8 @@ var tweetApp =  combineReducers({
   messageReducer: messageReducer,
   tweetList: tweetListReducer,
   tweet: tweetReducer,
-  discoverReducer: discoverReducer
+  discoverReducer: discoverReducer,
+  profileReducer: profileReducer
 })
 
 export default tweetApp;

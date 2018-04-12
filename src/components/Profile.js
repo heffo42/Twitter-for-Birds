@@ -15,6 +15,7 @@ class Profile extends Component {
     // TODO: the component should have  a ProfileBox  and TweetList component, if
     // an id is specified in the url (you can check this by looking at
     // this.props.match.params.id then render out a CreateTweetBox else dont
+
     // the ProfileBox should have the props `id` corresponding  to this.props.match.params.id
     // `user` corresponding to a  function that will dispatch the getUser async function with
     // appropriate arguments
@@ -38,10 +39,41 @@ class Profile extends Component {
     //  </div>
     // </div>
 
+
+    var tweetbox;
+    if(!this.props.match.params.id){
+      tweetbox = <CreateTweetBox/>
+    }
+
+
+     return (<div className="container">
+      <h2>Profile</h2>
+      <div className="row">
+        <div className="col-md-4">
+         <ProfileBox id={this.props.match.params.id}
+         user={() => this.props.user(this.props.match.params.id)}
+         favUnfav={() => this.props.favUnfav(this.props.match.params.id)}/>
+        </div>
+        <div className="col-md-8">
+          {tweetbox}
+          <TweetList loadTweets={() => this.props.loadTweetsFor(this.props.match.params.id)}/>
+        </div>
+      </div>
+     </div>)
+
+
+
   }
 }
-
+/*
 const mapDispatchToProps = dispatch =>
+return {}*/
+
+const mapDispatchToProps = dispatch => ({
+  loadTweetsFor:  (userId) => dispatch(loadTweetsForProfile(userId)),
+            user:  (id) => dispatch(getUser(id)),
+            favUnfav:  (id) => dispatch(favUnfav(id))
+          });
   // optionally use this to handle assigning dispatch actions to props
 
 

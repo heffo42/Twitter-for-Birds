@@ -22,10 +22,32 @@ export function updateProfile(data) {
   // properties name, species, and image
   // If the request fails/errors, send an action of type UPDATEPROFILE_REJ and
   // add an additional property `error` containing the error itself
+  return (dispatch) => {
+    authenticatedRequest('POST', '/api/profile/edit', data )
+      .then(res => res.json())
+      .then((resp) => {
+        const data = resp.data;
+        console.log('profile actions')
+        console.log(resp)
+        dispatch({
+          type: UPDATEPROFILE_FUL,
+          message: 'You have updated your profile and can now check it',
+          profile: data
+        });
+      })
+      .catch((error) => {
+        dispatch({
+          type: UPDATEPROFILE_REJ,
+          error,
+        });
+      });
+  };
+
 }
 
 
 export function getUser(id) {
+  console.log('profile action: getting user')
   // TODO: async action creator again
   // make an authenticated request to the route  that allows us to get profile
   // information. (you can ref your express files for this to see what type  of
@@ -36,6 +58,28 @@ export function getUser(id) {
   // method for what is returned)
   // if there's  an error, dispatch a GETPROFILE_REJ action with an addition property `error`
   // equal to the error
+var route = '/api/profile/info'
+if(id){
+  route = '/api/profile/'+id+'/info'
+}
+
+  return (dispatch) => {
+    authenticatedRequest('GET', route)
+      .then(res => res.json())
+      .then((resp) => {
+        dispatch({
+          type: GETPROFILE_FUL,
+          profile: resp.data,
+        });
+      })
+      .catch((error) => {
+        dispatch({
+          type: GETPROFILE_REJ,
+          error,
+        });
+      });
+  };
+
 }
 
 
@@ -48,4 +92,32 @@ export function favUnfav(id) {
   // else if there is an  error
   // dispatch an action FAVUNFAV_REJ  with an error equal  to the error of the
   // request
+  console.log('id is: ')
+  return (dispatch) => {
+    authenticatedRequest('POST', '/api/profile/'+id+'/follow')
+      .then(res => res.json())
+      .then((resp) => {
+        var statement = 'fill'
+        console.log(resp)
+        console.log(String(resp.data.isFollowing) + " with a type of: " + (typeof String(resp.data.isFollowing) ))
+        if(String(resp.data.isFollowing) === 'true'){
+          console.log('why can does this not happen')
+          statement = 'You are now following this person'
+        }else{
+          statement = 'You are now unfollowing this person'
+        }
+        dispatch({
+          type: FAVUNFAV_FUL,
+          profile: resp.data,
+          message: statement
+        });
+      })
+      .catch((error) => {
+        dispatch({
+          type: FAVUNFAV_REJ,
+          error,
+        });
+      });
+  };
+
 }

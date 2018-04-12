@@ -87,6 +87,25 @@ export function createNewTweet(tweetContent) {
   // if the request is successful we send  a CREATETWEET_FUL action with message and some data
   // corresponding  to the new tweet (we get it from the response (determined by express))
   // if there is  an error, dispatch a CREATETWEET_REJ error
+  return (dispatch) => {
+    authenticatedRequest('POST', '/api/tweet', { content: tweetContent })
+      .then(res => res.json())
+      .then((resp) => {
+        const data = resp.data;
+        dispatch({
+          type: CREATETWEET_FUL,
+          message: 'You have just made a new tweeeeeettttt',
+          data,
+        });
+      })
+      .catch((error) => {
+        dispatch({
+          type: CREATETWEET_REJ,
+          error,
+        });
+      });
+  };
+
 }
 
 export function getDiscoverBirds() {

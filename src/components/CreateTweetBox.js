@@ -11,6 +11,7 @@ class CreateTweetBox extends Component {
   submitTweet(e) {
     e.preventDefault();
     let tweetContent = this.refs.newTweet.value;
+    this.props.createNewTweet(tweetContent)
     // TODO: include a call to create a new tweet
   }
 
@@ -21,7 +22,7 @@ class CreateTweetBox extends Component {
           <div>
             <div className="form-group">
               <label>
-                What's happening?
+                Whats happening?
               </label>
               <textarea className="form-control" ref="newTweet"></textarea>
             </div>
@@ -39,9 +40,10 @@ class CreateTweetBox extends Component {
 
 
 const mapDispatchToProps = dispatch =>
+{return {createNewTweet:  (id) => dispatch(createNewTweet(id))}}
   // supply the component with a property 'createNewTweet' that will dispatch
   // the createNewTweet action  with the new tweet's content
-;
+
 
 export default connect(
   null,

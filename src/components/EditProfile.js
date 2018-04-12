@@ -16,6 +16,7 @@ class EditProfile extends Component {
       photo: this.refs.photo.value,
     };
     // TODO: make a call to update the profile
+    this.props.update(data)
   }
 
   render() {
@@ -67,7 +68,9 @@ class EditProfile extends Component {
 }
 
 
-const mapDispatchToProps = dispatch =>
+const mapDispatchToProps = dispatch => ({
+  update:  (data) => dispatch(updateProfile(data))
+  });
 
   // set up a call to the updateProfile async action creator
   // ie just do the regular mapDispatchToProps type of

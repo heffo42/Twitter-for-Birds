@@ -26676,6 +26676,10 @@ var _discoverReducer = __webpack_require__(125);
 
 var _discoverReducer2 = _interopRequireDefault(_discoverReducer);
 
+var _profileReducer = __webpack_require__(135);
+
+var _profileReducer2 = _interopRequireDefault(_profileReducer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // TODO: determine appropriate imports
@@ -26697,7 +26701,8 @@ var tweetApp = (0, _redux.combineReducers)({
   messageReducer: _messageReducer2.default,
   tweetList: _tweetListReducer2.default,
   tweet: _tweetReducer2.default,
-  discoverReducer: _discoverReducer2.default
+  discoverReducer: _discoverReducer2.default,
+  profileReducer: _profileReducer2.default
 });
 
 exports.default = tweetApp;
@@ -26782,6 +26787,14 @@ var _NewsFeed = __webpack_require__(126);
 
 var _NewsFeed2 = _interopRequireDefault(_NewsFeed);
 
+var _Profile = __webpack_require__(131);
+
+var _Profile2 = _interopRequireDefault(_Profile);
+
+var _EditProfile = __webpack_require__(136);
+
+var _EditProfile2 = _interopRequireDefault(_EditProfile);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -26825,18 +26838,17 @@ var App = function (_Component) {
         _react2.default.createElement(_Navbar2.default, null),
         _react2.default.createElement(_Flashes2.default, null),
         _react2.default.createElement(
-          _reactRouterDom.BrowserRouter,
+          'div',
           null,
           _react2.default.createElement(
-            'div',
+            _reactRouterDom.Switch,
             null,
-            _react2.default.createElement(
-              _reactRouterDom.Switch,
-              null,
-              _react2.default.createElement(_reactRouterDom.Route, { path: '/signx', component: _SignX2.default }),
-              _react2.default.createElement(_reactRouterDom.Route, { path: '/logout', component: (0, _AuthHOC2.default)(_Logout2.default) }),
-              _react2.default.createElement(_reactRouterDom.Route, { path: '/feed', component: (0, _AuthHOC2.default)(_NewsFeed2.default) })
-            )
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/signx', component: _SignX2.default }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/logout', component: (0, _AuthHOC2.default)(_Logout2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/feed', component: (0, _AuthHOC2.default)(_NewsFeed2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/profile/:id?', component: (0, _AuthHOC2.default)(_Profile2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { path: '/edit-profile', component: (0, _AuthHOC2.default)(_EditProfile2.default) }),
+            _react2.default.createElement(_reactRouterDom.Route, { component: _SignX2.default })
           )
         )
       );
@@ -26894,7 +26906,7 @@ var SignX = function (_Component) {
       // TODO: if  the user is authenticated,
       // change the location to /feed
       // via this.props.history.push
-      if (this.props.authenticated) {
+      if (this.props.isAuthenticated) {
         this.props.history.push('/feed');
       } else {
         console.log('not auth on mount');
@@ -26904,7 +26916,7 @@ var SignX = function (_Component) {
     key: 'componentDidUpdate',
     value: function componentDidUpdate() {
       // TODO: do the same thing as in component did mount
-      if (this.props.authenticated) {
+      if (this.props.isAuthenticated) {
         this.props.history.push('/feed');
       }
     }
@@ -26944,10 +26956,18 @@ var SignX = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      console.log('sign rendering');
+
       var _props = this.props,
           isAuthenticated = _props.isAuthenticated,
           isFetching = _props.isFetching,
           messages = _props.messages;
+
+      if (this.props.isAuthenticated) {
+        this.props.history.push('/feed');
+      } else {
+        console.log('not auth on mount');
+      }
 
       return _react2.default.createElement(
         'div',
@@ -27094,13 +27114,22 @@ var SignX = function (_Component) {
 
   return SignX;
 }(_react.Component);
+/*
+const mapStateToProps = (state) => {
+  console.log('signx mapStateToProps called')
+  let { authReducer } = state;
+  return authReducer;
+}*/
 
 var mapStateToProps = function mapStateToProps(state) {
-  console.log('signx mapStateToProps called');
-  var authReducer = state.authReducer;
 
-  return authReducer;
+  return state.authReducer;
 };
+
+/*
+const mapStateToProps = state => ({
+  authReducer: state.authReducer,
+});*/
 
 /*
 function mapStateToProps(state) {
@@ -27980,6 +28009,23 @@ function createNewTweet(tweetContent) {
   // if the request is successful we send  a CREATETWEET_FUL action with message and some data
   // corresponding  to the new tweet (we get it from the response (determined by express))
   // if there is  an error, dispatch a CREATETWEET_REJ error
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('POST', '/api/tweet', { content: tweetContent }).then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      var data = resp.data;
+      dispatch({
+        type: CREATETWEET_FUL,
+        message: 'You have just made a new tweeeeeettttt',
+        data: data
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: CREATETWEET_REJ,
+        error: error
+      });
+    });
+  };
 }
 
 function getDiscoverBirds() {
@@ -28497,13 +28543,13 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch)
 // TODO: set up a prop `favoriteTweet` dispatchings the favoriteTweet acition with the id
 // of the tweet (as an argument to this function
 {
-  favoriteTweet: (function (id) {
-    return dispatch((0, _tweetActions.favoriteTweet)(id));
-  });
+  return { favoriteTweet: function favoriteTweet(id) {
+      return dispatch((0, _tweetActions.favoriteTweet)(id));
+    } };
 };
 
 var mapStateToProps = function mapStateToProps(state, ownProps) {
-  return state.tweetReducer[ownProps.id];
+  return state.tweet[ownProps.id];
 };
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Tweet);
@@ -28547,6 +28593,679 @@ var tweetListReducer = function tweetListReducer() {
 // ENDSTUB
 
 exports.default = tweetListReducer;
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _TweetList = __webpack_require__(127);
+
+var _TweetList2 = _interopRequireDefault(_TweetList);
+
+var _ProfileBox = __webpack_require__(132);
+
+var _ProfileBox2 = _interopRequireDefault(_ProfileBox);
+
+var _CreateTweetBox = __webpack_require__(133);
+
+var _CreateTweetBox2 = _interopRequireDefault(_CreateTweetBox);
+
+var _tweetActions = __webpack_require__(123);
+
+var _profileActions = __webpack_require__(134);
+
+var _reactRedux = __webpack_require__(99);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Profile = function (_Component) {
+  _inherits(Profile, _Component);
+
+  function Profile(props) {
+    _classCallCheck(this, Profile);
+
+    return _possibleConstructorReturn(this, (Profile.__proto__ || Object.getPrototypeOf(Profile)).call(this, props));
+  }
+
+  _createClass(Profile, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      // TODO: the component should have  a ProfileBox  and TweetList component, if
+      // an id is specified in the url (you can check this by looking at
+      // this.props.match.params.id then render out a CreateTweetBox else dont
+
+      // the ProfileBox should have the props `id` corresponding  to this.props.match.params.id
+      // `user` corresponding to a  function that will dispatch the getUser async function with
+      // appropriate arguments
+      // `favUnfav` corresponding to a function that  will dispatch the favUnfav async function with
+      // appropriate arguments
+      // the TweetList should have a single property `loadTweets` equal  to a function that will
+      // dispatch the loadTweets async function with appropriate arguments (in this case the
+      // current user id which you can grab from this.props.match.params.id
+      //
+      // html structure
+      // <div class="container">
+      //  <h2>Profile</h2>
+      //  <div class="row">
+      //    <div class="col-md-4">
+      //      ... profile box
+      //    </div>
+      //    <div class="col-md-8">
+      //      ... optionally a create tweet box
+      //      ...  tweet list
+      //    </div>
+      //  </div>
+      // </div>
+
+
+      var tweetbox;
+      if (!this.props.match.params.id) {
+        tweetbox = _react2.default.createElement(_CreateTweetBox2.default, null);
+      }
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'container' },
+        _react2.default.createElement(
+          'h2',
+          null,
+          'Profile'
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'row' },
+          _react2.default.createElement(
+            'div',
+            { className: 'col-md-4' },
+            _react2.default.createElement(_ProfileBox2.default, { id: this.props.match.params.id,
+              user: function user() {
+                return _this2.props.user(_this2.props.match.params.id);
+              },
+              favUnfav: function favUnfav() {
+                return _this2.props.favUnfav(_this2.props.match.params.id);
+              } })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'col-md-8' },
+            tweetbox,
+            _react2.default.createElement(_TweetList2.default, { loadTweets: function loadTweets() {
+                return _this2.props.loadTweetsFor(_this2.props.match.params.id);
+              } })
+          )
+        )
+      );
+    }
+  }]);
+
+  return Profile;
+}(_react.Component);
+/*
+const mapDispatchToProps = dispatch =>
+return {}*/
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    loadTweetsFor: function loadTweetsFor(userId) {
+      return dispatch((0, _tweetActions.loadTweetsForProfile)(userId));
+    },
+    user: function user(id) {
+      return dispatch((0, _profileActions.getUser)(id));
+    },
+    favUnfav: function favUnfav(id) {
+      return dispatch((0, _profileActions.favUnfav)(id));
+    }
+  };
+};
+// optionally use this to handle assigning dispatch actions to props
+
+
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(Profile);
+
+/***/ }),
+/* 132 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _TweetList = __webpack_require__(127);
+
+var _TweetList2 = _interopRequireDefault(_TweetList);
+
+var _tweetActions = __webpack_require__(123);
+
+var _reactRedux = __webpack_require__(99);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ProfileBox = function (_Component) {
+  _inherits(ProfileBox, _Component);
+
+  function ProfileBox(props) {
+    _classCallCheck(this, ProfileBox);
+
+    return _possibleConstructorReturn(this, (ProfileBox.__proto__ || Object.getPrototypeOf(ProfileBox)).call(this, props));
+  }
+
+  _createClass(ProfileBox, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.props.user();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var button = this.props.id ? _react2.default.createElement(
+        'button',
+        { className: 'btn btn-primary', onClick: this.props.favUnfav },
+        this.props.profile.isFollowing === true ? 'Unfollow' : 'Follow'
+      ) : '';
+      var followersLength = this.props.profile.followers ? this.props.profile.followers.length : 0;
+      var followingLength = this.props.profile.following ? this.props.profile.following.length : 0;
+      return _react2.default.createElement(
+        'div',
+        { className: 'card' },
+        _react2.default.createElement('img', { className: 'card-img-top', src: this.props.profile.image, style: { height: '200px' } }),
+        _react2.default.createElement(
+          'div',
+          { className: 'card-body' },
+          _react2.default.createElement(
+            'div',
+            { className: 'card-title' },
+            this.props.profile.name
+          ),
+          _react2.default.createElement(
+            'p',
+            { className: 'text-muted' },
+            this.props.profile.species
+          ),
+          _react2.default.createElement('br', null),
+          ' Followers:',
+          followersLength,
+          _react2.default.createElement('br', null),
+          ' Following:',
+          followingLength,
+          _react2.default.createElement('br', null),
+          button,
+          _react2.default.createElement('br', null)
+        )
+      );
+    }
+  }]);
+
+  return ProfileBox;
+}(_react.Component);
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    profile: state.profileReducer.profile
+  };
+};
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, null)(ProfileBox);
+
+/***/ }),
+/* 133 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(99);
+
+var _tweetActions = __webpack_require__(123);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var CreateTweetBox = function (_Component) {
+  _inherits(CreateTweetBox, _Component);
+
+  function CreateTweetBox(props) {
+    _classCallCheck(this, CreateTweetBox);
+
+    var _this = _possibleConstructorReturn(this, (CreateTweetBox.__proto__ || Object.getPrototypeOf(CreateTweetBox)).call(this, props));
+
+    _this.submitTweet = _this.submitTweet.bind(_this);
+    return _this;
+  }
+
+  _createClass(CreateTweetBox, [{
+    key: 'submitTweet',
+    value: function submitTweet(e) {
+      e.preventDefault();
+      var tweetContent = this.refs.newTweet.value;
+      this.props.createNewTweet(tweetContent);
+      // TODO: include a call to create a new tweet
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'form',
+          { onSubmit: this.submitTweet },
+          _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement(
+              'div',
+              { className: 'form-group' },
+              _react2.default.createElement(
+                'label',
+                null,
+                'Whats happening?'
+              ),
+              _react2.default.createElement('textarea', { className: 'form-control', ref: 'newTweet' })
+            ),
+            _react2.default.createElement('input', {
+              type: 'submit',
+              className: 'btn btn-primary',
+              value: 'submit'
+            })
+          )
+        )
+      );
+    }
+  }]);
+
+  return CreateTweetBox;
+}(_react.Component);
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return { createNewTweet: function createNewTweet(id) {
+      return dispatch((0, _tweetActions.createNewTweet)(id));
+    } };
+};
+// supply the component with a property 'createNewTweet' that will dispatch
+// the createNewTweet action  with the new tweet's content
+
+
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(CreateTweetBox);
+
+/***/ }),
+/* 134 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.FAVUNFAV_REJ = exports.FAVUNFAV_FUL = exports.GETPROFILE_REJ = exports.GETPROFILE_FUL = exports.UPDATEPROFILE_REJ = exports.UPDATEPROFILE_FUL = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports.updateProfile = updateProfile;
+exports.getUser = getUser;
+exports.favUnfav = favUnfav;
+
+var _authenticatedRequest = __webpack_require__(124);
+
+var _authenticatedRequest2 = _interopRequireDefault(_authenticatedRequest);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var UPDATEPROFILE_FUL = exports.UPDATEPROFILE_FUL = 'UPDATEPROFILE_FUL';
+var UPDATEPROFILE_REJ = exports.UPDATEPROFILE_REJ = 'UPDATEPROFILE_REJ';
+
+var GETPROFILE_FUL = exports.GETPROFILE_FUL = 'GETPROFILE_FUL';
+var GETPROFILE_REJ = exports.GETPROFILE_REJ = 'GETPROFILE_REJ';
+
+var FAVUNFAV_FUL = exports.FAVUNFAV_FUL = 'FAVUNFAV_FUL';
+var FAVUNFAV_REJ = exports.FAVUNFAV_REJ = 'FAVUNFAV_REJ';
+
+function updateProfile(data) {
+  // TODO: will send a POST  request  to /api/profile/edit with the data passed into it
+  // this request will need to be an authenticated request (ref the import at the
+  // top of the file
+  // Note that this action creator is asynchronous. Look back at lecture to see
+  // how you should  structure this function in light of that fact
+  // From the response, grab the name, species, and image
+  // dispatch an UPDATEPROFILE_FUL action with additional properties `profile`
+  // and `message: 'You have updated your profile and can now check it'` In the
+  // `profile` preoperty of the action, set its value equal to an object with
+  // properties name, species, and image
+  // If the request fails/errors, send an action of type UPDATEPROFILE_REJ and
+  // add an additional property `error` containing the error itself
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('POST', '/api/profile/edit', data).then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      var data = resp.data;
+      console.log('profile actions');
+      console.log(resp);
+      dispatch({
+        type: UPDATEPROFILE_FUL,
+        message: 'You have updated your profile and can now check it',
+        profile: data
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: UPDATEPROFILE_REJ,
+        error: error
+      });
+    });
+  };
+}
+
+function getUser(id) {
+  console.log('profile action: getting user');
+  // TODO: async action creator again
+  // make an authenticated request to the route  that allows us to get profile
+  // information. (you can ref your express files for this to see what type  of
+  // request it is and the url pattern (note that you need to handle the case where
+  // id is empty/undefined and adjust the url accordingly
+  // When the request is successful, dispatch a GETPROFILE_FUL action with additional
+  // property `profile` containing  the result of the request relevant (ref your express
+  // method for what is returned)
+  // if there's  an error, dispatch a GETPROFILE_REJ action with an addition property `error`
+  // equal to the error
+  var route = '/api/profile/info';
+  if (id) {
+    route = '/api/profile/' + id + '/info';
+  }
+
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('GET', route).then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      dispatch({
+        type: GETPROFILE_FUL,
+        profile: resp.data
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: GETPROFILE_REJ,
+        error: error
+      });
+    });
+  };
+}
+
+function favUnfav(id) {
+  // TODO: async action creatora gain
+  // make an authenticated request to t he route that allows us to follow
+  // a user. when this returns, dispatch  a new FAVUNFAV_FUL action with properties
+  // profile equal to the respnose data and also  a message property that says
+  // 'You are now ' + following or unfollowing + ' this person'
+  // else if there is an  error
+  // dispatch an action FAVUNFAV_REJ  with an error equal  to the error of the
+  // request
+  console.log('id is: ');
+  return function (dispatch) {
+    (0, _authenticatedRequest2.default)('POST', '/api/profile/' + id + '/follow').then(function (res) {
+      return res.json();
+    }).then(function (resp) {
+      var statement = 'fill';
+      console.log(resp);
+      console.log(String(resp.data.isFollowing) + " with a type of: " + _typeof(String(resp.data.isFollowing)));
+      if (String(resp.data.isFollowing) === 'true') {
+        console.log('why can does this not happen');
+        statement = 'You are now following this person';
+      } else {
+        statement = 'You are now unfollowing this person';
+      }
+      dispatch({
+        type: FAVUNFAV_FUL,
+        profile: resp.data,
+        message: statement
+      });
+    }).catch(function (error) {
+      dispatch({
+        type: FAVUNFAV_REJ,
+        error: error
+      });
+    });
+  };
+}
+
+/***/ }),
+/* 135 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // providing this for  you bc im nice  :)
+
+
+var _profileActions = __webpack_require__(134);
+
+var initialState = {
+  profile: {
+    name: '',
+    species: '',
+    photo: '',
+    followers: [],
+    following: [],
+    isFollowing: false
+  }
+};
+
+var profileReducer = function profileReducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments[1];
+
+  switch (action.type) {
+    case _profileActions.UPDATEPROFILE_FUL:
+      return _extends({}, state, {
+        profile: Object.assign({}, state.profile, action.profile)
+      });
+    case _profileActions.GETPROFILE_FUL:
+      return _extends({}, state, {
+        profile: action.profile
+      });
+    case _profileActions.FAVUNFAV_FUL:
+      return _extends({}, state, {
+        profile: Object.assign({}, state.profile, action.profile)
+      });
+    default:
+      return state;
+  }
+};
+
+exports.default = profileReducer;
+
+/***/ }),
+/* 136 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _profileActions = __webpack_require__(134);
+
+var _reactRedux = __webpack_require__(99);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EditProfile = function (_Component) {
+  _inherits(EditProfile, _Component);
+
+  function EditProfile(props) {
+    _classCallCheck(this, EditProfile);
+
+    var _this = _possibleConstructorReturn(this, (EditProfile.__proto__ || Object.getPrototypeOf(EditProfile)).call(this, props));
+
+    _this.submitForm = _this.submitForm.bind(_this);
+    return _this;
+  }
+
+  _createClass(EditProfile, [{
+    key: 'submitForm',
+    value: function submitForm(e) {
+      e.preventDefault();
+      var data = {
+        name: this.refs.name.value,
+        species: this.refs.species.value,
+        photo: this.refs.photo.value
+      };
+      // TODO: make a call to update the profile
+      this.props.update(data);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        { className: 'container' },
+        _react2.default.createElement(
+          'h2',
+          null,
+          'Update Info:'
+        ),
+        _react2.default.createElement(
+          'form',
+          { onSubmit: this.submitForm },
+          _react2.default.createElement(
+            'div',
+            { className: 'form-group' },
+            _react2.default.createElement(
+              'label',
+              null,
+              'Name:'
+            ),
+            _react2.default.createElement('input', {
+              className: 'form-control',
+              type: 'text',
+              ref: 'name'
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'form-group' },
+            _react2.default.createElement(
+              'label',
+              null,
+              'Species:'
+            ),
+            _react2.default.createElement('input', {
+              className: 'form-control',
+              type: 'text',
+              ref: 'species'
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'form-group' },
+            _react2.default.createElement(
+              'label',
+              null,
+              'Image:'
+            ),
+            _react2.default.createElement('input', {
+              className: 'form-control',
+              type: 'text',
+              ref: 'photo'
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'form-group' },
+            _react2.default.createElement('input', {
+              type: 'submit',
+              className: 'btn btn-primary',
+              value: 'Make Edits'
+            })
+          )
+        )
+      );
+    }
+  }]);
+
+  return EditProfile;
+}(_react.Component);
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    update: function update(data) {
+      return dispatch((0, _profileActions.updateProfile)(data));
+    }
+  };
+};
+
+// set up a call to the updateProfile async action creator
+// ie just do the regular mapDispatchToProps type of
+// pattern for dispatching updateProfile
+
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(EditProfile);
 
 /***/ })
 /******/ ]);

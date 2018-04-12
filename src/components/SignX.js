@@ -12,7 +12,7 @@ class SignX extends Component {
     // TODO: if  the user is authenticated,
     // change the location to /feed
     // via this.props.history.push
-    if (this.props.authenticated) {
+    if (this.props.isAuthenticated) {
       this.props.history.push('/feed')
     }else{
       console.log('not auth on mount')
@@ -21,7 +21,7 @@ class SignX extends Component {
 
   componentDidUpdate() {
     // TODO: do the same thing as in component did mount
-    if (this.props.authenticated) {
+    if (this.props.isAuthenticated) {
       this.props.history.push('/feed')
     }
   }
@@ -56,8 +56,16 @@ class SignX extends Component {
   }
 
   render() {
+    console.log('sign rendering')
 
     let { isAuthenticated, isFetching, messages } = this.props;
+    if (this.props.isAuthenticated) {
+      this.props.history.push('/feed')
+    }else{
+      console.log('not auth on mount')
+    }
+
+
     return (
       <div className="container">
         <div className="row">
@@ -158,12 +166,22 @@ class SignX extends Component {
     );
   }
 }
-
+/*
 const mapStateToProps = (state) => {
   console.log('signx mapStateToProps called')
   let { authReducer } = state;
   return authReducer;
+}*/
+
+const mapStateToProps = (state) => {
+
+  return state.authReducer;
 }
+
+/*
+const mapStateToProps = state => ({
+  authReducer: state.authReducer,
+});*/
 
 /*
 function mapStateToProps(state) {

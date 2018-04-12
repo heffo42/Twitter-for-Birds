@@ -51,11 +51,11 @@ class Tweet extends Component {
 const mapDispatchToProps = dispatch =>
   // TODO: set up a prop `favoriteTweet` dispatchings the favoriteTweet acition with the id
   // of the tweet (as an argument to this function
-    {favoriteTweet:  (id) => dispatch(favoriteTweet(id))}
+  {return  {favoriteTweet:  (id) => dispatch(favoriteTweet(id))}}
 
 
 const mapStateToProps = (state, ownProps) => {
-  return state.tweetReducer[ownProps.id]
+  return state.tweet[ownProps.id]
 }
 
 
